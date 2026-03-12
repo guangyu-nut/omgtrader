@@ -2,10 +2,6 @@
   <main class="page">
     <header class="page-header">
       <h1>数据中心</h1>
-      <nav class="nav">
-        <button type="button" @click="goTo('/workbench')">工作台</button>
-        <button type="button" @click="goTo('/strategy-center')">策略中心</button>
-      </nav>
     </header>
 
     <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
@@ -45,7 +41,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 
-import { router } from "../router";
 import DataSourceForm from "../components/data/DataSourceForm.vue";
 import SyncTaskTable from "../components/data/SyncTaskTable.vue";
 import { marketDataStore } from "../stores/marketData";
@@ -62,10 +57,6 @@ onMounted(async () => {
     errorMessage.value = error instanceof Error ? error.message : "加载数据中心失败";
   }
 });
-
-async function goTo(path: string) {
-  await router.push(path);
-}
 
 async function handleCreateDataSource() {
   errorMessage.value = "";
@@ -92,19 +83,6 @@ async function handleCreateDataSource() {
 .page-header {
   display: grid;
   gap: 0.75rem;
-}
-
-.nav {
-  display: flex;
-  gap: 1rem;
-}
-
-.nav button {
-  background: none;
-  border: none;
-  color: #0f62fe;
-  cursor: pointer;
-  padding: 0;
 }
 
 .grid {

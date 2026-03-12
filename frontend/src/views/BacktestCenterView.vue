@@ -2,10 +2,6 @@
   <main class="page">
     <header class="page-header">
       <h1>回测中心</h1>
-      <nav class="nav">
-        <button type="button" @click="goTo('/workbench')">工作台</button>
-        <button type="button" @click="goTo('/results/demo')">结果页</button>
-      </nav>
     </header>
 
     <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
@@ -41,10 +37,6 @@ onMounted(async () => {
   await backtestStore.loadRecentJobs();
 });
 
-async function goTo(path: string) {
-  await router.push(path);
-}
-
 async function handleLaunch() {
   errorMessage.value = "";
 
@@ -72,19 +64,6 @@ async function handleLaunch() {
 .page-header {
   display: grid;
   gap: 0.75rem;
-}
-
-.nav {
-  display: flex;
-  gap: 1rem;
-}
-
-.nav button {
-  background: none;
-  border: none;
-  color: #0f62fe;
-  cursor: pointer;
-  padding: 0;
 }
 
 .grid {

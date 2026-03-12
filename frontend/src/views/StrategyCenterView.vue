@@ -2,10 +2,6 @@
   <main class="page">
     <header class="page-header">
       <h1>策略中心</h1>
-      <nav class="nav">
-        <button type="button" @click="goTo('/data-center')">数据中心</button>
-        <button type="button" @click="goTo('/backtests')">回测中心</button>
-      </nav>
     </header>
 
     <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
@@ -30,7 +26,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
 
-import { router } from "../router";
 import StockPoolEditor from "../components/strategies/StockPoolEditor.vue";
 import StrategyForm from "../components/strategies/StrategyForm.vue";
 import { strategyStore } from "../stores/strategies";
@@ -41,10 +36,6 @@ const stockPoolName = ref("CSI300 manual");
 const strategyName = ref("Top N demo");
 const successMessage = ref("");
 const symbolsText = ref("000001.SZ\n600000.SH\n000002.SZ");
-
-async function goTo(path: string) {
-  await router.push(path);
-}
 
 async function handleCreateStockPool() {
   errorMessage.value = "";
@@ -93,19 +84,6 @@ async function handleCreateStrategy() {
 .page-header {
   display: grid;
   gap: 0.75rem;
-}
-
-.nav {
-  display: flex;
-  gap: 1rem;
-}
-
-.nav button {
-  background: none;
-  border: none;
-  color: #0f62fe;
-  cursor: pointer;
-  padding: 0;
 }
 
 .grid {
