@@ -12,5 +12,10 @@ export const router = createRouter({
       name: "login",
       component: () => import("./views/LoginView.vue"),
     },
+    {
+      path: "/results/:jobId",
+      name: "results",
+      component: () => import("./views/ResultsView.vue"),
+    },
   ],
 });
