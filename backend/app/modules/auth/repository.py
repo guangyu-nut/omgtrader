@@ -28,3 +28,11 @@ class AuthRepository:
         self._db_session.commit()
         self._db_session.refresh(session)
         return session
+
+    def get_user_by_token(self, token: str) -> User | None:
+        statement = (
+            select(User)
+            .join(UserSession, UserSession.user_id == User.id)
+            .where(UserSession.token == token, UserSession.expires_at >= datetime.now(UTC))
+        )
+        return self._db_session.scalar(statement)

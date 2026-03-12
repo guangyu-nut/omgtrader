@@ -61,3 +61,10 @@ def seeded_user(database_url: str, monkeypatch: pytest.MonkeyPatch) -> dict[str,
         session.refresh(user)
 
         return {"id": user.id, "username": user.username}
+
+
+@pytest.fixture
+def auth_headers(client: TestClient, seeded_user: dict[str, str]) -> dict[str, str]:
+    response = client.post("/api/auth/login", json={"username": "demo", "password": "pass123456"})
+    token = response.json()["token"]
+    return {"Authorization": f"Bearer {token}"}

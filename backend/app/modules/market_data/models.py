@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 from uuid import uuid4
 
 from sqlalchemy import Boolean, Date, DateTime, Float, ForeignKey, String, UniqueConstraint
@@ -49,3 +49,24 @@ class BarMinute(Base):
     low: Mapped[float] = mapped_column(Float(), nullable=False)
     close: Mapped[float] = mapped_column(Float(), nullable=False)
     volume: Mapped[float] = mapped_column(Float(), nullable=False)
+
+
+class DataSourceConfig(Base):
+    __tablename__ = "data_source_configs"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    name: Mapped[str] = mapped_column(String(64), nullable=False)
+    provider_type: Mapped[str] = mapped_column(String(32), nullable=False)
+    enabled: Mapped[bool] = mapped_column(Boolean(), default=True, nullable=False)
+    created_by_user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(), default=lambda: datetime.now(UTC), nullable=False)
+
+
+class DataSyncTask(Base):
+    __tablename__ = "data_sync_tasks"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    data_source_config_id: Mapped[str] = mapped_column(ForeignKey("data_source_configs.id"), nullable=False)
+    status: Mapped[str] = mapped_column(String(32), nullable=False, default="pending")
+    started_at: Mapped[datetime | None] = mapped_column(DateTime(), nullable=True)
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime(), nullable=True)
