@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
 from app.modules.ai_assistant.router import router as ai_assistant_router
@@ -12,6 +13,13 @@ from app.modules.strategies.router import router as strategies_router
 settings = get_settings()
 
 app = FastAPI(title=settings.app_name)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://127.0.0.1:5173", "http://localhost:5173"],
+    allow_credentials=True,
+    allow_headers=["*"],
+    allow_methods=["*"],
+)
 app.include_router(ai_assistant_router)
 app.include_router(auth_router)
 app.include_router(backtests_router)
