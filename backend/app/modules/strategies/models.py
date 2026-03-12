@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime, UTC
 from uuid import uuid4
 
-from sqlalchemy import DateTime, Float, ForeignKey, Integer, JSON, String
+from sqlalchemy import DateTime, Float, ForeignKey, Integer, JSON, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -39,3 +39,17 @@ class StockPool(Base):
     symbols: Mapped[list[str]] = mapped_column(JSON(), nullable=False, default=list)
     created_by_user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(), default=lambda: datetime.now(UTC), nullable=False)
+
+
+class PythonStrategy(Base):
+    __tablename__ = "python_strategies"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), nullable=False)
+    name: Mapped[str] = mapped_column(String(128), nullable=False)
+    description: Mapped[str] = mapped_column(Text(), nullable=False, default="")
+    tags_text: Mapped[str] = mapped_column(Text(), nullable=False, default="")
+    parameter_schema_text: Mapped[str] = mapped_column(Text(), nullable=False, default="")
+    code: Mapped[str] = mapped_column(Text(), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(), default=lambda: datetime.now(UTC), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(), default=lambda: datetime.now(UTC), nullable=False)
