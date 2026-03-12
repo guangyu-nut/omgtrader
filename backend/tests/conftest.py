@@ -68,3 +68,21 @@ def auth_headers(client: TestClient, seeded_user: dict[str, str]) -> dict[str, s
     response = client.post("/api/auth/login", json={"username": "demo", "password": "pass123456"})
     token = response.json()["token"]
     return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture
+def db_session(database_url: str, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setenv("OMGTRADER_DATABASE_URL", database_url)
+
+    from app.core.config import get_settings
+    from app.core.database import SessionLocal, reset_database_state
+
+    get_settings.cache_clear()
+    reset_database_state()
+
+    alembic_config = Config("backend/alembic.ini")
+    alembic_config.set_main_option("sqlalchemy.url", database_url)
+    command.upgrade(alembic_config, "head")
+
+    with SessionLocal() as session:
+        yield session

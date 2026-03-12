@@ -70,3 +70,15 @@ class DataSyncTask(Base):
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="pending")
     started_at: Mapped[datetime | None] = mapped_column(DateTime(), nullable=True)
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(), nullable=True)
+
+
+class DataCoverage(Base):
+    __tablename__ = "data_coverages"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    symbol_code: Mapped[str] = mapped_column(String(16), unique=True, nullable=False)
+    daily_start: Mapped[date | None] = mapped_column(Date(), nullable=True)
+    daily_end: Mapped[date | None] = mapped_column(Date(), nullable=True)
+    minute_start: Mapped[datetime | None] = mapped_column(DateTime(), nullable=True)
+    minute_end: Mapped[datetime | None] = mapped_column(DateTime(), nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(), default=lambda: datetime.now(UTC), nullable=False)

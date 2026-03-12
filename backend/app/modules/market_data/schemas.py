@@ -26,3 +26,13 @@ class DataSyncTaskRead(BaseModel):
     finished_at: datetime | None
 
     model_config = {"from_attributes": True}
+
+
+class DataCoverageRead(BaseModel):
+    symbol_code: str
+    daily_start: datetime | None = None
+    daily_end: datetime | None = None
+    minute_start: datetime | None = None
+    minute_end: datetime | None = None
+
+    model_config = {"from_attributes": True}

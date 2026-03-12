@@ -19,3 +19,6 @@ class MarketDataService:
 
     def list_sync_tasks(self):
         return self._repository.list_sync_tasks()
+
+    def list_coverages(self):
+        return self._repository.list_coverages()
