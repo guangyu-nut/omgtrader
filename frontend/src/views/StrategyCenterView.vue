@@ -16,11 +16,12 @@
         @select="selectStrategy"
       />
       <PythonStrategyEditor
-        v-model="editorState"
+        :model-value="editorState"
         :mode="editorMode"
         @delete="handleDelete"
         @reset="resetEditorState"
         @save="handleSave"
+        @update:model-value="handleEditorChange"
       />
     </section>
   </main>
@@ -53,6 +54,7 @@ const DEFAULT_CODE = `class Strategy:
 const errorMessage = ref("");
 const searchText = ref("");
 const editorState = ref<EditorState | null>(null);
+const savedSnapshot = ref("");
 
 const editorMode = computed<"empty" | "draft" | "edit">(() => {
   if (editorState.value === null) {
@@ -84,30 +86,38 @@ async function loadInitialState() {
     const items = await pythonStrategyStore.loadList();
     if (items.length === 0) {
       pythonStrategyStore.clearSelection();
-      editorState.value = null;
+      setPersistedEditorState(null);
       return;
     }
 
-    await selectStrategy(items[0].id);
+    await selectStrategy(items[0].id, true);
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : "加载策略中心失败";
   }
 }
 
-async function selectStrategy(strategyId: string) {
+async function selectStrategy(strategyId: string, force = false) {
+  if (!force && !confirmDiscardChanges()) {
+    return;
+  }
+
   errorMessage.value = "";
 
   try {
     const strategy = await pythonStrategyStore.selectStrategy(strategyId);
-    editorState.value = toEditorState(strategy);
+    setPersistedEditorState(toEditorState(strategy));
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : "加载策略详情失败";
   }
 }
 
 function startDraft() {
+  if (!confirmDiscardChanges()) {
+    return;
+  }
+
   pythonStrategyStore.clearSelection();
-  editorState.value = createDraftState();
+  setPersistedEditorState(createDraftState());
 }
 
 async function handleSave() {
@@ -119,7 +129,7 @@ async function handleSave() {
 
   try {
     const saved = await pythonStrategyStore.saveStrategy(toPayload(editorState.value));
-    editorState.value = toEditorState(saved);
+    setPersistedEditorState(toEditorState(saved));
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : "保存 Python 策略失败";
   }
@@ -130,11 +140,15 @@ async function handleDelete() {
     return;
   }
 
+  if (!window.confirm("确定删除当前 Python 策略吗？")) {
+    return;
+  }
+
   errorMessage.value = "";
 
   try {
     const next = await pythonStrategyStore.removeStrategy(editorState.value.id);
-    editorState.value = next ? toEditorState(next) : null;
+    setPersistedEditorState(next ? toEditorState(next) : null);
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : "删除 Python 策略失败";
   }
@@ -146,11 +160,11 @@ async function resetEditorState() {
   }
 
   if (!editorState.value.id) {
-    editorState.value = createDraftState();
+    setPersistedEditorState(createDraftState());
     return;
   }
 
-  await selectStrategy(editorState.value.id);
+  await selectStrategy(editorState.value.id, true);
 }
 
 function createDraftState(): EditorState {
@@ -187,6 +201,31 @@ function toPayload(state: EditorState): PythonStrategyPayload & { id?: string } 
     parameter_schema_text: state.parameterSchemaText,
     code: state.code,
   };
+}
+
+function handleEditorChange(value: EditorState) {
+  editorState.value = value;
+}
+
+function setPersistedEditorState(value: EditorState | null) {
+  editorState.value = value;
+  savedSnapshot.value = serializeEditorState(value);
+}
+
+function confirmDiscardChanges() {
+  if (!isDirty()) {
+    return true;
+  }
+
+  return window.confirm("当前策略有未保存修改，确定要离开吗？");
+}
+
+function isDirty() {
+  return serializeEditorState(editorState.value) !== savedSnapshot.value;
+}
+
+function serializeEditorState(value: EditorState | null) {
+  return JSON.stringify(value);
 }
 </script>
 
