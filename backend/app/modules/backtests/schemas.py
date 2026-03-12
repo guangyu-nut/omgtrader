@@ -3,6 +3,21 @@ from __future__ import annotations
 from pydantic import BaseModel
 
 
+class BacktestJobCreate(BaseModel):
+    strategy_instance_id: str
+
+
+class BacktestMetricsRead(BaseModel):
+    total_return: float | None
+    max_drawdown: float | None
+
+
+class BacktestJobRead(BaseModel):
+    id: str
+    status: str
+    metrics: BacktestMetricsRead
+
+
 class BacktestSnapshotRead(BaseModel):
     strategy_instance_id: str
     strategy_name: str
