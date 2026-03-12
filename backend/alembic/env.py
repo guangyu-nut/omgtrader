@@ -7,6 +7,7 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 
 from app.core.database import Base
+from app.modules.ai_assistant import models as ai_models
 from app.modules.auth import models as auth_models
 from app.modules.backtests import models as backtest_models
 from app.modules.market_data import models as market_data_models
@@ -21,7 +22,7 @@ if config.config_file_name is not None:
 target_metadata = Base.metadata
 
 # Import side effects ensure models are attached to Base metadata.
-_ = (auth_models, backtest_models, market_data_models, result_models, strategy_models)
+_ = (ai_models, auth_models, backtest_models, market_data_models, result_models, strategy_models)
 
 
 def _get_url() -> str:

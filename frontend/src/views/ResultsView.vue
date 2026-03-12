@@ -14,6 +14,7 @@
     </section>
 
     <RebalanceTable v-if="result" :rows="result.rebalances" />
+    <AiInsightPanel v-if="result" :job-id="String(route.params.jobId)" />
   </main>
 </template>
 
@@ -23,6 +24,7 @@ import { useRoute } from "vue-router";
 
 import { buildEquityCurveOptions } from "../charts/equityCurveOptions";
 import { getBacktestResult, type BacktestResult } from "../api/results";
+import AiInsightPanel from "../components/results/AiInsightPanel.vue";
 import MetricsCards from "../components/results/MetricsCards.vue";
 import RebalanceTable from "../components/results/RebalanceTable.vue";
 

@@ -27,6 +27,7 @@ def test_initial_migration_creates_core_tables(tmp_path: Path) -> None:
     strategy_columns = {column["name"] for column in inspector.get_columns("strategy_instances")}
 
     assert {
+        "ai_insights",
         "users",
         "symbols",
         "bar_daily",

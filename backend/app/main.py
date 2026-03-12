@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
 from app.core.config import get_settings
+from app.modules.ai_assistant.router import router as ai_assistant_router
 from app.modules.auth.router import router as auth_router
 from app.modules.backtests.router import router as backtests_router
 from app.modules.market_data.router import router as market_data_router
@@ -11,6 +12,7 @@ from app.modules.strategies.router import router as strategies_router
 settings = get_settings()
 
 app = FastAPI(title=settings.app_name)
+app.include_router(ai_assistant_router)
 app.include_router(auth_router)
 app.include_router(backtests_router)
 app.include_router(market_data_router)
