@@ -25,8 +25,17 @@ import BacktestJobTable from "../components/backtests/BacktestJobTable.vue";
 import BacktestLaunchCard from "../components/backtests/BacktestLaunchCard.vue";
 import { backtestStore } from "../stores/backtests";
 
+function getLastStrategyId() {
+  if (typeof window === "undefined") {
+    return "";
+  }
+
+  const storage = window.localStorage;
+  return storage && typeof storage.getItem === "function" ? (storage.getItem("lastStrategyId") ?? "") : "";
+}
+
 const errorMessage = ref("");
-const strategyInstanceId = ref("");
+const strategyInstanceId = ref(getLastStrategyId());
 
 onMounted(async () => {
   await backtestStore.loadRecentJobs();
