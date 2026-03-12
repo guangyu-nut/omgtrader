@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+from datetime import UTC, datetime
+
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.modules.strategies.models import StockPool, StrategyInstance
+from app.modules.strategies.models import PythonStrategy, StockPool, StrategyInstance
 
 
 class StrategiesRepository:
@@ -51,3 +54,63 @@ class StrategiesRepository:
         self._db_session.commit()
         self._db_session.refresh(strategy)
         return strategy
+
+    def create_python_strategy(
+        self,
+        *,
+        user_id: str,
+        name: str,
+        description: str,
+        tags_text: str,
+        parameter_schema_text: str,
+        code: str,
+    ) -> PythonStrategy:
+        strategy = PythonStrategy(
+            user_id=user_id,
+            name=name,
+            description=description,
+            tags_text=tags_text,
+            parameter_schema_text=parameter_schema_text,
+            code=code,
+        )
+        self._db_session.add(strategy)
+        self._db_session.commit()
+        self._db_session.refresh(strategy)
+        return strategy
+
+    def list_python_strategies(self, *, user_id: str) -> list[PythonStrategy]:
+        statement = (
+            select(PythonStrategy)
+            .where(PythonStrategy.user_id == user_id)
+            .order_by(PythonStrategy.updated_at.desc(), PythonStrategy.created_at.desc())
+        )
+        return list(self._db_session.scalars(statement))
+
+    def get_python_strategy(self, *, strategy_id: str, user_id: str) -> PythonStrategy | None:
+        statement = select(PythonStrategy).where(PythonStrategy.id == strategy_id, PythonStrategy.user_id == user_id)
+        return self._db_session.scalar(statement)
+
+    def update_python_strategy(
+        self,
+        strategy: PythonStrategy,
+        *,
+        name: str,
+        description: str,
+        tags_text: str,
+        parameter_schema_text: str,
+        code: str,
+    ) -> PythonStrategy:
+        strategy.name = name
+        strategy.description = description
+        strategy.tags_text = tags_text
+        strategy.parameter_schema_text = parameter_schema_text
+        strategy.code = code
+        strategy.updated_at = datetime.now(UTC)
+
+        self._db_session.commit()
+        self._db_session.refresh(strategy)
+        return strategy
+
+    def delete_python_strategy(self, strategy: PythonStrategy) -> None:
+        self._db_session.delete(strategy)
+        self._db_session.commit()

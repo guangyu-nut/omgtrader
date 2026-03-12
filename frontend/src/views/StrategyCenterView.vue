@@ -2,75 +2,230 @@
   <main class="page">
     <header class="page-header">
       <h1>策略中心</h1>
+      <p>用列表方式管理 Python 策略资产，后续再接入执行能力。</p>
     </header>
 
     <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
-    <p v-if="successMessage" class="success">{{ successMessage }}</p>
 
-    <section class="grid">
-      <StockPoolEditor
-        v-model:name="stockPoolName"
-        v-model:symbols-text="symbolsText"
-        @submit="handleCreateStockPool"
+    <section class="layout">
+      <PythonStrategyListPanel
+        v-model:query="searchText"
+        :items="filteredStrategies"
+        :selected-id="pythonStrategyStore.selectedId"
+        @create="startDraft"
+        @select="selectStrategy"
       />
-      <StrategyForm v-model:hold-count="holdCount" v-model:name="strategyName" @submit="handleCreateStrategy" />
-    </section>
-
-    <section class="panel">
-      <h2>最近策略</h2>
-      <p>{{ strategyStore.latestStrategyId || "暂无策略" }}</p>
+      <PythonStrategyEditor
+        :model-value="editorState"
+        :mode="editorMode"
+        @delete="handleDelete"
+        @reset="resetEditorState"
+        @save="handleSave"
+        @update:model-value="handleEditorChange"
+      />
     </section>
   </main>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 
-import StockPoolEditor from "../components/strategies/StockPoolEditor.vue";
-import StrategyForm from "../components/strategies/StrategyForm.vue";
-import { strategyStore } from "../stores/strategies";
+import type { PythonStrategyDetail, PythonStrategyPayload } from "../api/pythonStrategies";
+import PythonStrategyEditor from "../components/strategies/PythonStrategyEditor.vue";
+import PythonStrategyListPanel from "../components/strategies/PythonStrategyListPanel.vue";
+import { pythonStrategyStore } from "../stores/pythonStrategies";
+
+
+type EditorState = {
+  id: string;
+  name: string;
+  description: string;
+  tagsText: string;
+  parameterSchemaText: string;
+  code: string;
+};
+
+
+const DEFAULT_CODE = `class Strategy:
+    def build_signals(self, context):
+        return []
+`;
 
 const errorMessage = ref("");
-const holdCount = ref(2);
-const stockPoolName = ref("CSI300 manual");
-const strategyName = ref("Top N demo");
-const successMessage = ref("");
-const symbolsText = ref("000001.SZ\n600000.SH\n000002.SZ");
+const searchText = ref("");
+const editorState = ref<EditorState | null>(null);
+const savedSnapshot = ref("");
 
-async function handleCreateStockPool() {
+const editorMode = computed<"empty" | "draft" | "edit">(() => {
+  if (editorState.value === null) {
+    return "empty";
+  }
+
+  return editorState.value.id ? "edit" : "draft";
+});
+
+const filteredStrategies = computed(() => {
+  const query = searchText.value.trim().toLowerCase();
+  if (!query) {
+    return pythonStrategyStore.items;
+  }
+
+  return pythonStrategyStore.items.filter((item) =>
+    [item.name, item.description, item.tags.join(" ")].join(" ").toLowerCase().includes(query),
+  );
+});
+
+onMounted(async () => {
+  await loadInitialState();
+});
+
+async function loadInitialState() {
   errorMessage.value = "";
-  successMessage.value = "";
 
   try {
-    const stockPool = await strategyStore.createStockPool({
-      name: stockPoolName.value,
-      symbols: symbolsText.value
-        .split(/\s+/)
-        .map((symbol) => symbol.trim())
-        .filter(Boolean),
-    });
-    successMessage.value = `股票池已创建：${stockPool.id}`;
+    const items = await pythonStrategyStore.loadList();
+    if (items.length === 0) {
+      pythonStrategyStore.clearSelection();
+      setPersistedEditorState(null);
+      return;
+    }
+
+    await selectStrategy(items[0].id, true);
   } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : "创建股票池失败";
+    errorMessage.value = error instanceof Error ? error.message : "加载策略中心失败";
   }
 }
 
-async function handleCreateStrategy() {
+async function selectStrategy(strategyId: string, force = false) {
+  if (!force && !confirmDiscardChanges()) {
+    return;
+  }
+
   errorMessage.value = "";
-  successMessage.value = "";
 
   try {
-    const strategy = await strategyStore.createStrategy({
-      benchmark_symbol: "000300.SH",
-      commission_bps: 5,
-      hold_count: holdCount.value,
-      name: strategyName.value,
-      slippage_bps: 15,
-    });
-    successMessage.value = `策略已创建：${strategy.id}`;
+    const strategy = await pythonStrategyStore.selectStrategy(strategyId);
+    setPersistedEditorState(toEditorState(strategy));
   } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : "创建策略失败";
+    errorMessage.value = error instanceof Error ? error.message : "加载策略详情失败";
   }
+}
+
+function startDraft() {
+  if (!confirmDiscardChanges()) {
+    return;
+  }
+
+  pythonStrategyStore.clearSelection();
+  setPersistedEditorState(createDraftState());
+}
+
+async function handleSave() {
+  if (editorState.value === null) {
+    return;
+  }
+
+  errorMessage.value = "";
+
+  try {
+    const saved = await pythonStrategyStore.saveStrategy(toPayload(editorState.value));
+    setPersistedEditorState(toEditorState(saved));
+  } catch (error) {
+    errorMessage.value = error instanceof Error ? error.message : "保存 Python 策略失败";
+  }
+}
+
+async function handleDelete() {
+  if (editorState.value === null || !editorState.value.id) {
+    return;
+  }
+
+  if (!window.confirm("确定删除当前 Python 策略吗？")) {
+    return;
+  }
+
+  errorMessage.value = "";
+
+  try {
+    const next = await pythonStrategyStore.removeStrategy(editorState.value.id);
+    setPersistedEditorState(next ? toEditorState(next) : null);
+  } catch (error) {
+    errorMessage.value = error instanceof Error ? error.message : "删除 Python 策略失败";
+  }
+}
+
+async function resetEditorState() {
+  if (editorState.value === null) {
+    return;
+  }
+
+  if (!editorState.value.id) {
+    setPersistedEditorState(createDraftState());
+    return;
+  }
+
+  await selectStrategy(editorState.value.id, true);
+}
+
+function createDraftState(): EditorState {
+  return {
+    id: "",
+    name: "My Python Strategy",
+    description: "",
+    tagsText: "",
+    parameterSchemaText: "",
+    code: DEFAULT_CODE,
+  };
+}
+
+function toEditorState(strategy: PythonStrategyDetail): EditorState {
+  return {
+    id: strategy.id,
+    name: strategy.name,
+    description: strategy.description,
+    tagsText: strategy.tags.join(", "),
+    parameterSchemaText: strategy.parameter_schema_text,
+    code: strategy.code,
+  };
+}
+
+function toPayload(state: EditorState): PythonStrategyPayload & { id?: string } {
+  return {
+    id: state.id || undefined,
+    name: state.name,
+    description: state.description,
+    tags: state.tagsText
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter(Boolean),
+    parameter_schema_text: state.parameterSchemaText,
+    code: state.code,
+  };
+}
+
+function handleEditorChange(value: EditorState) {
+  editorState.value = value;
+}
+
+function setPersistedEditorState(value: EditorState | null) {
+  editorState.value = value;
+  savedSnapshot.value = serializeEditorState(value);
+}
+
+function confirmDiscardChanges() {
+  if (!isDirty()) {
+    return true;
+  }
+
+  return window.confirm("当前策略有未保存修改，确定要离开吗？");
+}
+
+function isDirty() {
+  return serializeEditorState(editorState.value) !== savedSnapshot.value;
+}
+
+function serializeEditorState(value: EditorState | null) {
+  return JSON.stringify(value);
 }
 </script>
 
@@ -83,28 +238,31 @@ async function handleCreateStrategy() {
 
 .page-header {
   display: grid;
-  gap: 0.75rem;
+  gap: 0.5rem;
 }
 
-.grid {
+.page-header h1,
+.page-header p {
+  margin: 0;
+}
+
+.page-header p {
+  color: #475467;
+}
+
+.layout {
   display: grid;
   gap: 1rem;
-  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
-}
-
-.panel {
-  border: 1px solid #d0d5dd;
-  border-radius: 0.75rem;
-  display: grid;
-  gap: 0.75rem;
-  padding: 1rem;
+  grid-template-columns: minmax(18rem, 24rem) minmax(0, 1fr);
 }
 
 .error {
   color: #b42318;
 }
 
-.success {
-  color: #027a48;
+@media (max-width: 980px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

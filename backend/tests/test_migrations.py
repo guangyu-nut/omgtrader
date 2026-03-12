@@ -32,6 +32,7 @@ def test_initial_migration_creates_core_tables(tmp_path: Path) -> None:
         "symbols",
         "bar_daily",
         "bar_minute",
+        "python_strategies",
         "strategy_instances",
         "stock_pools",
         "backtest_jobs",
