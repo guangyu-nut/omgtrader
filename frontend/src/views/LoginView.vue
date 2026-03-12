@@ -19,6 +19,7 @@
 <script setup lang="ts">
 import { reactive, ref } from "vue";
 
+import { router } from "../router";
 import { authStore } from "../stores/auth";
 
 const errorMessage = ref("");
@@ -35,6 +36,7 @@ async function handleSubmit() {
       password: form.password,
       username: form.username,
     });
+    await router.push("/workbench");
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : "登录失败";
   }
