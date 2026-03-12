@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Literal
 
 from pydantic import BaseModel, Field
@@ -45,3 +46,33 @@ class StrategyInstanceRead(BaseModel):
     benchmark_symbol: str
 
     model_config = {"from_attributes": True}
+
+
+class PythonStrategyCreate(BaseModel):
+    name: str = Field(min_length=1)
+    description: str = ""
+    tags: list[str] = Field(default_factory=list)
+    parameter_schema_text: str = ""
+    code: str = Field(min_length=1)
+
+
+class PythonStrategyUpdate(BaseModel):
+    name: str = Field(min_length=1)
+    description: str = ""
+    tags: list[str] = Field(default_factory=list)
+    parameter_schema_text: str = ""
+    code: str = Field(min_length=1)
+
+
+class PythonStrategyListItem(BaseModel):
+    id: str
+    name: str
+    description: str
+    tags: list[str]
+    updated_at: datetime
+
+
+class PythonStrategyRead(PythonStrategyListItem):
+    parameter_schema_text: str
+    code: str
+    created_at: datetime
