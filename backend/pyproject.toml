@@ -9,6 +9,8 @@ description = "Backend service for the A-share backtesting MVP"
 requires-python = ">=3.11"
 dependencies = [
   "fastapi>=0.116,<1.0",
+  "alembic>=1.16,<2.0",
+  "sqlalchemy>=2.0.41,<3.0",
   "uvicorn>=0.35,<1.0",
   "pydantic-settings>=2.10,<3.0",
 ]
@@ -22,3 +24,6 @@ dev = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+
+[tool.setuptools.packages.find]
+include = ["app*"]

@@ -5,6 +5,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     app_name: str = "omgtrader-backend"
+    database_url: str = "sqlite:///./omgtrader.db"
 
     model_config = SettingsConfigDict(env_prefix="OMGTRADER_", extra="ignore")
 
