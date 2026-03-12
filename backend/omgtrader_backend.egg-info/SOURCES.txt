@@ -1,7 +1,0 @@
-pyproject.toml
-omgtrader_backend.egg-info/PKG-INFO
-omgtrader_backend.egg-info/SOURCES.txt
-omgtrader_backend.egg-info/dependency_links.txt
-omgtrader_backend.egg-info/requires.txt
-omgtrader_backend.egg-info/top_level.txt
-tests/test_health_api.py
