@@ -74,6 +74,18 @@ button:hover {
   transform: translateY(-1px);
 }
 
+button.button-secondary {
+  background: rgba(22, 33, 51, 0.06);
+  border-color: rgba(22, 33, 51, 0.1);
+  color: var(--text-secondary);
+}
+
+button.button-danger {
+  background: rgba(185, 28, 28, 0.08);
+  border-color: rgba(185, 28, 28, 0.14);
+  color: #991b1b;
+}
+
 button:disabled {
   cursor: not-allowed;
   opacity: 0.6;

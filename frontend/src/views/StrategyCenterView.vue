@@ -1,11 +1,32 @@
 <template>
-  <main class="page">
+  <main class="page-shell strategy-center-view">
     <header class="page-header">
-      <h1>策略中心</h1>
-      <p>用列表方式管理 Python 策略资产，后续再接入执行能力。</p>
+      <p class="eyebrow">Python Lab</p>
+      <h1>Python 策略工作台</h1>
+      <p class="page-intro">
+        把 Python 策略当成研究资产来维护，先完成列表、详情和代码保存，再逐步接入执行能力。
+      </p>
     </header>
 
     <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+
+    <section class="panel-grid panel-grid--three">
+      <article class="surface-card surface-card--muted strategy-summary-card">
+        <p class="section-label">Assets</p>
+        <strong>{{ pythonStrategyStore.items.length }} 条策略资产</strong>
+        <span>列表视图专注管理已保存的 Python 策略，适合作为研究入口。</span>
+      </article>
+      <article class="surface-card strategy-summary-card">
+        <p class="section-label">Search</p>
+        <strong>{{ filteredStrategies.length }} 条当前结果</strong>
+        <span>通过搜索快速切换到目标策略，避免在资产列表里来回跳转。</span>
+      </article>
+      <article class="surface-card strategy-summary-card strategy-summary-card--signal">
+        <p class="section-label">Mode</p>
+        <strong>{{ editorMode === "draft" ? "Draft" : editorMode === "edit" ? "Editing" : "Idle" }}</strong>
+        <span>代码编辑区保持独立深色终端语气，突出策略写作和参数说明。</span>
+      </article>
+    </section>
 
     <section class="layout">
       <PythonStrategyListPanel
@@ -230,34 +251,38 @@ function serializeEditorState(value: EditorState | null) {
 </script>
 
 <style scoped>
-.page {
-  display: grid;
-  gap: 1rem;
-  padding: 2rem;
-}
-
-.page-header {
-  display: grid;
-  gap: 0.5rem;
-}
-
-.page-header h1,
-.page-header p {
-  margin: 0;
-}
-
-.page-header p {
-  color: #475467;
+.strategy-center-view {
+  padding: var(--space-3) 0 var(--space-7);
 }
 
 .layout {
   display: grid;
-  gap: 1rem;
+  gap: var(--space-5);
   grid-template-columns: minmax(18rem, 24rem) minmax(0, 1fr);
 }
 
 .error {
-  color: #b42318;
+  color: #b45309;
+  margin: 0;
+}
+
+.strategy-summary-card {
+  min-height: 10.5rem;
+}
+
+.strategy-summary-card strong {
+  font-size: 1.15rem;
+}
+
+.strategy-summary-card span {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.strategy-summary-card--signal {
+  background:
+    linear-gradient(135deg, rgba(123, 176, 255, 0.16) 0%, rgba(16, 23, 36, 0.02) 60%),
+    var(--bg-panel);
 }
 
 @media (max-width: 980px) {
