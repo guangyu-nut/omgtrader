@@ -1,8 +1,18 @@
 <template>
-  <section class="panel">
-    <h2>发起回测</h2>
-    <label class="field">
-      <span>策略实例 ID</span>
+  <section class="surface-card backtest-launch-card">
+    <div class="surface-header">
+      <div class="surface-header__copy">
+        <p class="section-label">Launch Action</p>
+        <h2>发起回测</h2>
+        <p class="subtle-copy">当前仍使用策略实例 ID 发起旧回测链路，适合作为视觉重构阶段的稳定入口。</p>
+      </div>
+      <div class="status-pills">
+        <span class="status-pill status-pill--signal">Legacy Input</span>
+      </div>
+    </div>
+
+    <label class="field-stack">
+      <span class="field-label">策略实例 ID</span>
       <input
         :value="strategyInstanceId"
         placeholder="输入策略实例 ID"
@@ -25,16 +35,7 @@ defineEmits<{
 </script>
 
 <style scoped>
-.panel {
-  border: 1px solid #d0d5dd;
-  border-radius: 0.75rem;
-  display: grid;
-  gap: 0.75rem;
-  padding: 1rem;
-}
-
-.field {
-  display: grid;
-  gap: 0.35rem;
+.backtest-launch-card {
+  min-height: 100%;
 }
 </style>

@@ -1,12 +1,34 @@
 <template>
-  <main class="page">
+  <main class="page-shell data-center-view">
     <header class="page-header">
-      <h1>数据中心</h1>
+      <p class="eyebrow">Data Operations</p>
+      <h1>数据运行面板</h1>
+      <p class="page-intro">
+        管理本地数据源、同步任务与行情覆盖范围，确认回测前的数据是否已经就绪。
+      </p>
     </header>
 
     <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
 
-    <section class="grid">
+    <section class="panel-grid panel-grid--three">
+      <article class="surface-card surface-card--muted data-summary-card">
+        <p class="section-label">Sources</p>
+        <strong>{{ marketDataStore.dataSources.length }} 个数据源</strong>
+        <span>支持免费源与 Token 源双层接入，当前优先服务本地研究场景。</span>
+      </article>
+      <article class="surface-card data-summary-card">
+        <p class="section-label">Tasks</p>
+        <strong>{{ marketDataStore.syncTasks.length }} 条同步任务</strong>
+        <span>同步队列用于追踪最近更新状态和失败信息，帮助定位数据缺口。</span>
+      </article>
+      <article class="surface-card data-summary-card">
+        <p class="section-label">Coverage</p>
+        <strong>{{ marketDataStore.coverages.length }} 个覆盖标的</strong>
+        <span>覆盖范围区会显示最近更新时间，帮助你判断数据是否适合发起回测。</span>
+      </article>
+    </section>
+
+    <section class="panel-grid panel-grid--two">
       <DataSourceForm
         v-model:name="dataSourceName"
         v-model:provider-type="providerType"
@@ -15,8 +37,19 @@
       <SyncTaskTable :rows="marketDataStore.syncTasks" />
     </section>
 
-    <section class="panel">
-      <h2>覆盖范围</h2>
+    <section class="table-surface coverage-panel">
+      <div class="surface-header coverage-panel__header">
+        <div class="surface-header__copy">
+          <p class="section-label">Coverage</p>
+          <h2>覆盖范围</h2>
+          <p class="subtle-copy">重点确认日线与分钟线的最近更新时间，避免研究基线漂移。</p>
+        </div>
+        <div class="status-pills">
+          <span class="status-pill status-pill--active">A 股</span>
+          <span class="status-pill">Minute Aware</span>
+        </div>
+      </div>
+
       <table>
         <thead>
           <tr>
@@ -74,44 +107,32 @@ async function handleCreateDataSource() {
 </script>
 
 <style scoped>
-.page {
+.data-center-view {
+  padding: var(--space-3) 0 var(--space-7);
+}
+
+.data-summary-card {
+  min-height: 10.5rem;
+}
+
+.data-summary-card strong {
+  font-size: 1.15rem;
+}
+
+.data-summary-card span {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.coverage-panel {
   display: grid;
-  gap: 1rem;
-  padding: 2rem;
-}
-
-.page-header {
-  display: grid;
-  gap: 0.75rem;
-}
-
-.grid {
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
-}
-
-.panel {
-  border: 1px solid #d0d5dd;
-  border-radius: 0.75rem;
-  display: grid;
-  gap: 0.75rem;
-  padding: 1rem;
-}
-
-table {
-  border-collapse: collapse;
-  width: 100%;
-}
-
-th,
-td {
-  border-bottom: 1px solid #d0d5dd;
-  padding: 0.5rem;
-  text-align: left;
+  gap: var(--space-4);
+  overflow: hidden;
+  padding: var(--space-6);
 }
 
 .error {
-  color: #b42318;
+  color: #b45309;
+  margin: 0;
 }
 </style>
