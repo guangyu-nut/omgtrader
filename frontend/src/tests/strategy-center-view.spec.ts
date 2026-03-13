@@ -65,7 +65,9 @@ describe("StrategyCenterView", () => {
     await flushPromises();
     await flushPromises();
 
+    expect(wrapper.text()).toContain("Python 策略工作台");
     expect(wrapper.text()).toContain("Alpha");
+    expect(wrapper.get('[data-testid="python-code-editor"]').exists()).toBe(true);
     expect((wrapper.get("textarea").element as HTMLTextAreaElement).value).toContain("class Strategy");
   });
 

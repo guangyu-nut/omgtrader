@@ -1,6 +1,7 @@
 import { flushPromises, mount } from "@vue/test-utils";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import * as aiApi from "../api/ai";
 import * as resultsApi from "../api/results";
 import { router } from "../router";
 import ResultsView from "../views/ResultsView.vue";
@@ -24,6 +25,10 @@ describe("ResultsView", () => {
       },
       rebalances: [],
     });
+    vi.spyOn(aiApi, "generateInsight").mockResolvedValue({
+      summary: "回测表现稳健",
+      risks: ["换手较高"],
+    });
 
     const wrapper = mount(ResultsView, {
       global: {
@@ -33,7 +38,9 @@ describe("ResultsView", () => {
 
     await flushPromises();
 
+    expect(wrapper.text()).toContain("分析总览");
     expect(wrapper.text()).toContain("最大回撤");
     expect(wrapper.text()).toContain("累计收益");
+    expect(wrapper.text()).toContain("策略总结");
   });
 });

@@ -30,4 +30,15 @@ describe("LoginView", () => {
 
     expect(authStore.token).toBe("session-token");
   });
+
+  it("renders the trading desk login copy", () => {
+    const wrapper = mount(LoginView, {
+      global: {
+        plugins: [router],
+      },
+    });
+
+    expect(wrapper.text()).toContain("A 股量化研究终端");
+    expect(wrapper.text()).toContain("本地运行");
+  });
 });

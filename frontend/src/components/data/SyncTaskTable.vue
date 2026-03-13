@@ -1,7 +1,17 @@
 <template>
-  <section class="panel">
-    <h2>同步任务</h2>
-    <p v-if="rows.length === 0">暂无同步任务</p>
+  <section class="table-surface sync-task-table">
+    <div class="surface-header">
+      <div class="surface-header__copy">
+        <p class="section-label">Task Queue</p>
+        <h2>同步任务</h2>
+        <p class="subtle-copy">最近的数据拉取和更新会显示在这里，便于快速确认任务状态。</p>
+      </div>
+      <div class="status-pills">
+        <span class="status-pill status-pill--active">{{ rows.length }} Tasks</span>
+      </div>
+    </div>
+
+    <p v-if="rows.length === 0" class="empty-copy">暂无同步任务</p>
     <table v-else>
       <thead>
         <tr>
@@ -28,23 +38,15 @@ defineProps<{
 </script>
 
 <style scoped>
-.panel {
-  border: 1px solid #d0d5dd;
-  border-radius: 0.75rem;
+.sync-task-table {
   display: grid;
-  gap: 0.75rem;
-  padding: 1rem;
+  gap: var(--space-4);
+  overflow: hidden;
+  padding: var(--space-6);
 }
 
-table {
-  border-collapse: collapse;
-  width: 100%;
-}
-
-th,
-td {
-  border-bottom: 1px solid #d0d5dd;
-  padding: 0.5rem;
-  text-align: left;
+.empty-copy {
+  color: var(--text-muted);
+  margin: 0;
 }
 </style>

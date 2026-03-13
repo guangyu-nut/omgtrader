@@ -1,15 +1,19 @@
 <template>
-  <section class="panel">
-    <div class="panel-header">
-      <div>
+  <section class="surface-card strategy-list-panel">
+    <div class="surface-header strategy-list-panel__header">
+      <div class="surface-header__copy">
+        <p class="section-label">Strategy Directory</p>
         <h2>Python 策略</h2>
-        <p>浏览与管理你的 Python 策略资产。</p>
+        <p class="subtle-copy">浏览、搜索并切换你的 Python 策略资产，右侧保持单页编辑工作流。</p>
+      </div>
+      <div class="status-pills">
+        <span class="status-pill status-pill--active">{{ items.length }} Assets</span>
       </div>
       <button type="button" @click="$emit('create')">新建 Python 策略</button>
     </div>
 
-    <label class="field">
-      <span>搜索</span>
+    <label class="field-stack">
+      <span class="field-label">搜索</span>
       <input
         :value="query"
         placeholder="搜索策略"
@@ -18,7 +22,10 @@
     </label>
 
     <div v-if="items.length === 0" class="empty-state">
-      <p>创建第一条 Python 策略</p>
+      <div class="empty-state__copy">
+        <strong>创建第一条 Python 策略</strong>
+        <p>先保存一份策略说明和代码骨架，后续再把执行能力接上去。</p>
+      </div>
     </div>
 
     <div v-else class="list">
@@ -29,7 +36,10 @@
         type="button"
         @click="$emit('select', item.id)"
       >
-        <strong>{{ item.name }}</strong>
+        <div class="list-item__header">
+          <strong>{{ item.name }}</strong>
+          <span class="list-item__timestamp">{{ formatTimestamp(item.updated_at) }}</span>
+        </div>
         <p>{{ item.description || "暂无说明" }}</p>
         <small>{{ item.tags.join(" / ") || "未打标签" }}</small>
       </button>
@@ -51,57 +61,52 @@ defineEmits<{
   select: [strategyId: string];
   "update:query": [value: string];
 }>();
+
+function formatTimestamp(value: string) {
+  return value.replace("T", " ").slice(0, 16);
+}
 </script>
 
 <style scoped>
-.panel {
-  border: 1px solid #d0d5dd;
-  border-radius: 1rem;
+.strategy-list-panel {
   display: grid;
-  gap: 1rem;
-  padding: 1rem;
-}
-
-.panel-header {
-  display: flex;
-  gap: 1rem;
-  justify-content: space-between;
-}
-
-.panel-header h2,
-.panel-header p {
-  margin: 0;
-}
-
-.panel-header p {
-  color: #475467;
-  font-size: 0.9rem;
-  margin-top: 0.35rem;
-}
-
-.field {
-  display: grid;
-  gap: 0.35rem;
+  min-height: 100%;
 }
 
 .list {
   display: grid;
-  gap: 0.75rem;
+  gap: 0.9rem;
 }
 
 .list-item {
-  background: #ffffff;
-  border: 1px solid #d0d5dd;
-  border-radius: 0.9rem;
+  align-items: start;
+  background: rgba(18, 32, 51, 0.03);
+  border: 1px solid rgba(18, 32, 51, 0.06);
+  border-radius: 1rem;
   display: grid;
-  gap: 0.35rem;
-  padding: 0.85rem;
+  gap: 0.4rem;
+  min-height: 7.2rem;
+  padding: 1rem;
   text-align: left;
 }
 
 .list-item.is-active {
-  border-color: #0f62fe;
-  box-shadow: 0 0 0 1px #0f62fe inset;
+  background:
+    linear-gradient(135deg, rgba(123, 176, 255, 0.18) 0%, rgba(255, 141, 77, 0.08) 100%);
+  border-color: rgba(59, 130, 246, 0.22);
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.14) inset;
+}
+
+.list-item__header {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: space-between;
+}
+
+.list-item__timestamp {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
 }
 
 .list-item strong,
@@ -111,8 +116,21 @@ defineEmits<{
 }
 
 .list-item p,
-.list-item small,
-.empty-state {
-  color: #475467;
+.list-item small {
+  color: var(--text-muted);
+}
+
+.empty-state__copy {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.empty-state__copy strong,
+.empty-state__copy p {
+  margin: 0;
+}
+
+.empty-state__copy p {
+  color: var(--text-muted);
 }
 </style>

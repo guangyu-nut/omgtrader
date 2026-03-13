@@ -1,12 +1,22 @@
 <template>
-  <section class="panel">
-    <h2>添加数据源</h2>
-    <label class="field">
-      <span>名称</span>
+  <section class="surface-card data-source-form">
+    <div class="surface-header">
+      <div class="surface-header__copy">
+        <p class="section-label">Source Config</p>
+        <h2>添加数据源</h2>
+        <p class="subtle-copy">先配置接入方式，再让同步任务去追踪拉取和更新状态。</p>
+      </div>
+      <div class="status-pills">
+        <span class="status-pill">Free / Token</span>
+      </div>
+    </div>
+
+    <label class="field-stack">
+      <span class="field-label">名称</span>
       <input :value="name" @input="$emit('update:name', ($event.target as HTMLInputElement).value)" />
     </label>
-    <label class="field">
-      <span>类型</span>
+    <label class="field-stack">
+      <span class="field-label">类型</span>
       <select :value="providerType" @change="$emit('update:providerType', ($event.target as HTMLSelectElement).value)">
         <option value="free">免费源</option>
         <option value="token">Token 源</option>
@@ -30,16 +40,7 @@ defineEmits<{
 </script>
 
 <style scoped>
-.panel {
-  border: 1px solid #d0d5dd;
-  border-radius: 0.75rem;
-  display: grid;
-  gap: 0.75rem;
-  padding: 1rem;
-}
-
-.field {
-  display: grid;
-  gap: 0.35rem;
+.data-source-form {
+  min-height: 100%;
 }
 </style>
