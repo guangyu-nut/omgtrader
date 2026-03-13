@@ -164,6 +164,45 @@ describe("StrategyCenterView", () => {
     expect((wrapper.get('input[value="Alpha Updated"]').element as HTMLInputElement).value).toBe("Alpha Updated");
   });
 
+  it("shows a cancel button in draft mode but not in edit mode", async () => {
+  // edit mode: load a strategy
+  fetchMock
+    .mockResolvedValueOnce({
+      ok: true,
+      json: async () => [
+        { id: "ps-1", name: "Alpha", description: "", tags: [], updated_at: "2026-03-12T10:00:00Z" },
+      ],
+    })
+    .mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        id: "ps-1",
+        name: "Alpha",
+        description: "",
+        tags: [],
+        parameter_schema_text: "",
+        code: "class Strategy:\n    pass\n",
+        created_at: "2026-03-12T10:00:00Z",
+        updated_at: "2026-03-12T10:00:00Z",
+      }),
+    });
+
+  const wrapper = mount(StrategyCenterView);
+  await flushPromises();
+  await flushPromises();
+
+  // edit mode: no cancel button
+  const cancelInEdit = wrapper.findAll("button").find((b) => b.text() === "取消");
+  expect(cancelInEdit).toBeUndefined();
+
+  // enter draft mode (no API call needed)
+  await wrapper.findAll("button").find((b) => b.text() === "新建 Python 策略")!.trigger("click");
+
+  // draft mode: cancel button visible
+  const cancelInDraft = wrapper.findAll("button").find((b) => b.text() === "取消");
+  expect(cancelInDraft).toBeDefined();
+});
+
   it("confirms deletion and falls back to the empty state", async () => {
     vi.spyOn(window, "confirm").mockReturnValue(true);
     fetchMock

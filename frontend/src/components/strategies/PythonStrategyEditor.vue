@@ -70,6 +70,9 @@
 
       <div class="actions">
         <button type="button" @click="$emit('save')">保存</button>
+        <button v-if="mode === 'draft'" class="button-secondary" type="button" @click="$emit('cancel')">
+          取消
+        </button>
         <button v-if="mode === 'edit'" class="button-danger" type="button" @click="$emit('delete')">删除</button>
         <button class="button-secondary" type="button" @click="$emit('reset')">恢复未保存修改</button>
       </div>
@@ -96,6 +99,7 @@ const emit = defineEmits<{
   save: [];
   delete: [];
   reset: [];
+  cancel: [];
   "update:modelValue": [value: EditorState];
 }>();
 
