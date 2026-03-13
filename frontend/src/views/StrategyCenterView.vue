@@ -39,6 +39,7 @@
       <PythonStrategyEditor
         :model-value="editorState"
         :mode="editorMode"
+        @cancel="handleCancelDraft"
         @delete="handleDelete"
         @reset="resetEditorState"
         @save="handleSave"
@@ -76,6 +77,9 @@ const errorMessage = ref("");
 const searchText = ref("");
 const editorState = ref<EditorState | null>(null);
 const savedSnapshot = ref("");
+
+type CancelTarget = { editorState: EditorState | null; selectedId: string };
+const cancelTarget = ref<CancelTarget | null>(null);
 
 const editorMode = computed<"empty" | "draft" | "edit">(() => {
   if (editorState.value === null) {
@@ -133,12 +137,24 @@ async function selectStrategy(strategyId: string, force = false) {
 }
 
 function startDraft() {
-  if (!confirmDiscardChanges()) {
-    return;
-  }
-
+  if (!confirmDiscardChanges()) return;
+  // 顺序重要：先保存快照，再清除选中状态
+  cancelTarget.value = {
+    editorState: savedSnapshot.value ? (JSON.parse(savedSnapshot.value) as EditorState | null) : null,
+    selectedId: pythonStrategyStore.selectedId,
+  };
   pythonStrategyStore.clearSelection();
   setPersistedEditorState(createDraftState());
+}
+
+function handleCancelDraft() {
+  if (!confirmDiscardChanges()) return;
+  const target = cancelTarget.value;
+  cancelTarget.value = null;
+  if (target) {
+    pythonStrategyStore.restoreHighlight(target.selectedId);
+    setPersistedEditorState(target.editorState);
+  }
 }
 
 async function handleSave() {

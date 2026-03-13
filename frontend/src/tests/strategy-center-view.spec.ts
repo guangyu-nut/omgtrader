@@ -252,4 +252,65 @@ describe("StrategyCenterView", () => {
     expect(window.confirm).toHaveBeenCalled();
     expect(wrapper.text()).toContain("创建第一条 Python 策略");
   });
+
+  it("cancel in draft mode restores the previously selected strategy", async () => {
+    fetchMock
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => [
+          { id: "ps-1", name: "Alpha", description: "", tags: [], updated_at: "2026-03-12T10:00:00Z" },
+        ],
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          id: "ps-1",
+          name: "Alpha",
+          description: "",
+          tags: [],
+          parameter_schema_text: "",
+          code: "class Strategy:\n    pass\n",
+          created_at: "2026-03-12T10:00:00Z",
+          updated_at: "2026-03-12T10:00:00Z",
+        }),
+      });
+
+    const wrapper = mount(StrategyCenterView);
+    await flushPromises();
+    await flushPromises();
+
+    // enter draft mode
+    await wrapper.findAll("button").find((b) => b.text() === "新建 Python 策略")!.trigger("click");
+    expect(wrapper.text()).toContain("新建 Python 策略");
+
+    // click cancel
+    await wrapper.findAll("button").find((b) => b.text() === "取消")!.trigger("click");
+
+    // should be back in edit mode showing Alpha
+    expect(wrapper.text()).toContain("策略详情");
+    expect((wrapper.get('input[value="Alpha"]').element as HTMLInputElement).value).toBe("Alpha");
+    // no cancel button visible in edit mode
+    expect(wrapper.findAll("button").find((b) => b.text() === "取消")).toBeUndefined();
+  });
+
+  it("cancel in draft mode shows empty state when no prior strategy", async () => {
+    fetchMock.mockResolvedValueOnce({
+      ok: true,
+      json: async () => [],
+    });
+
+    const wrapper = mount(StrategyCenterView);
+    await flushPromises();
+
+    // enter draft mode
+    await wrapper.findAll("button").find((b) => b.text() === "新建 Python 策略")!.trigger("click");
+    expect(wrapper.text()).toContain("新建 Python 策略");
+
+    // click cancel
+    await wrapper.findAll("button").find((b) => b.text() === "取消")!.trigger("click");
+
+    // should show empty state
+    expect(wrapper.text()).toContain("选择一个策略");
+    expect(wrapper.findAll("button").find((b) => b.text() === "取消")).toBeUndefined();
+  });
 });
