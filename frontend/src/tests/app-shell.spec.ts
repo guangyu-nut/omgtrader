@@ -39,6 +39,21 @@ describe("App shell", () => {
     expect(wrapper.get('[data-testid="app-sidebar"]').text()).toContain("回测中心");
   });
 
+  it("shows the terminal shell brand and local mode badge", async () => {
+    await router.push("/workbench");
+
+    const wrapper = mount(App, {
+      global: {
+        plugins: [router],
+      },
+    });
+
+    await flushPromises();
+
+    expect(wrapper.get('[data-testid="app-sidebar"]').text()).toContain("OMGTrader");
+    expect(wrapper.get('[data-testid="app-sidebar"]').text()).toContain("Local Mode");
+  });
+
   it("marks the active navigation item", async () => {
     await router.push("/strategy-center");
 
