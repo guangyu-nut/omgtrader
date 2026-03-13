@@ -42,6 +42,10 @@ function clearSelection() {
   state.selectedStrategy = null;
 }
 
+function restoreHighlight(id: string) {
+  state.selectedId = id;
+}
+
 async function saveStrategy(payload: PythonStrategyPayload & { id?: string }) {
   const saved = payload.id
     ? await updatePythonStrategy(payload.id, payload)
@@ -88,6 +92,7 @@ export const pythonStrategyStore = {
   loadList,
   selectStrategy,
   clearSelection,
+  restoreHighlight,
   saveStrategy,
   removeStrategy,
   reset,
